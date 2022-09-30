@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-md-8 ml-5">
             <div class="card-body m-3">
-                <form action="/transferencia" method="POST">
+                <form action="transferencia" method="POST">
                     <div class="form-floating m-3">
                         <select class="form-select" id="floatingSelect" name="origen" aria-label="Floating label select example" required>
                             <option selected>Cuenta Origen</option>
