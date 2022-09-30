@@ -7,9 +7,7 @@
         <div class="col-md-8 ml-5">
             <h1>Deposito</h1>
             <div class="card-body m-3">
-                <c:forEach items="${parametros}" var="item">
-                  <p>${item}</p>                                 
-                </c:forEach>                
+                            
             </div>
             <div class="card-body m-3">
                 <p>${origen}</p>

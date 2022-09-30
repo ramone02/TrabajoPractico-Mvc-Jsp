@@ -27,10 +27,10 @@ public class CuentaServlet extends HttpServlet{
         try {
              Map<String, String[]> parametros = req.getParameterMap();
              CuentaBancaria.transferir(parametros);
-             req.setAttribute("origen", req.getAttribute("origen"));
-             req.setAttribute("destino", req.getAttribute("destino"));
-             req.setAttribute("origen", req.getAttribute("monto"));
-             req.setAttribute("parametros", parametros);
+             req.setAttribute("origen", parametros.get("origen")[0]);
+             req.setAttribute("destino", parametros.get("destino")[0]);
+             req.setAttribute("monto", parametros.get("monto")[0]);
+             
              req.getRequestDispatcher("/WEB-INF/views/transferencia/deposito.jsp").forward(req, resp);
         } catch (Exception e) {
             req.getRequestDispatcher("/WEB-INF/views/transferencia/index.jsp").forward(req, resp);
