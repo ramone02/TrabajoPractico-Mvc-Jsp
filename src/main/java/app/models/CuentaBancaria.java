@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CuentaBancaria implements Serializable {
@@ -11,6 +12,8 @@ public class CuentaBancaria implements Serializable {
     public CuentaBancaria() {
     }
 
+    public static List<CuentaBancaria> cuentas = new LinkedList<>();
+    private LinkedList<String> errores = new LinkedList<>();
     private Integer id;
     private double saldo;
     private List<String> movimientos;
@@ -31,6 +34,10 @@ public class CuentaBancaria implements Serializable {
         this.saldo = saldo;
     }
 
+    public List<String> getErrores() {
+        return this.errores;
+    }
+
     public List<String> getMovimientos() {
         return movimientos;
     }
@@ -40,8 +47,8 @@ public class CuentaBancaria implements Serializable {
     }
 
     //Lista de CuentaBancaria instanciadas, para poder trabajar la persistencia
-    public static List<CuentaBancaria> getCuentas() {
-        List<CuentaBancaria> cuentas = new LinkedList<>();
+    public static List<CuentaBancaria> setCuentas() {
+
         CuentaBancaria cuenta1 = new CuentaBancaria();
         cuenta1.setId(001);
         cuenta1.setSaldo(20000);
@@ -59,59 +66,74 @@ public class CuentaBancaria implements Serializable {
         return cuentas;
     }
 
-    public static void transferir(Map<String, String[]> parametros) {
-        List<CuentaBancaria> cuentas = CuentaBancaria.getCuentas();
-        List<String> errores = new LinkedList<>();
+    public static List<CuentaBancaria> getCuentas() {
+        return cuentas;
+    }
+
+    public void transferir(Map<String, String[]> parametros) throws FormException {
+        List<CuentaBancaria> cuentas = CuentaBancaria.getCuentas();        
         String patternNum = "[\\d]+";
         Integer idOrigen = Integer.parseInt(parametros.get("origen")[0]);
         Integer idDestino = Integer.parseInt(parametros.get("destino")[0]);
         Double monto = Double.parseDouble(parametros.get("monto")[0]);
 
         if (parametros.get("origen")[0].isEmpty()) {
-            errores.add("El campo Cuenta Origen esta vacio");
+            this.errores.add("El campo Cuenta Origen esta vacio");
         } else if (!Pattern.matches(patternNum, parametros.get("origen")[0])) {
-            errores.add("El campo Cuenta Origen no es numero");
+            this.errores.add("El campo Cuenta Origen no es numero");
         } else if (idOrigen.equals(idDestino)) {
-            errores.add("La transferencia no se puede enviar a la misma cuenta de origen");
+            this.errores.add("La transferencia no se puede enviar a la misma cuenta de origen");
         }
 
         if (parametros.get("destino")[0].isEmpty()) {
-            errores.add("El campo Cuenta Destino esta vacio");
+            this.errores.add("El campo Cuenta Destino esta vacio");
         } else if (!Pattern.matches(patternNum, parametros.get("destino")[0])) {
-            errores.add("El campo Cuenta Destino no es numero");
+            this.errores.add("El campo Cuenta Destino no es numero");
         }
         
+
         for (CuentaBancaria cuenta : cuentas) {
             if (cuenta.getId().equals(idOrigen)) {
                 if (cuenta.getSaldo() >= monto) {
                     cuenta.setSaldo(cuenta.getSaldo() - monto);
                 } else {
-                    errores.add("El monto que desea transferir es mayor a su saldo");
+                    this.errores.add("El monto que desea transferir es mayor a su saldo");
                 }
-            } else if (cuenta.getId().equals(idDestino)) {
+            }
+        }
+
+        if (errores.size() > 0) {
+            throw new FormException("Se han encontrado Errores");
+        }
+
+        for (CuentaBancaria cuenta : cuentas) {
+            if (cuenta.getId().equals(idDestino)) {
                 cuenta.setSaldo(cuenta.getSaldo() + monto);
             }
         }
 
-//        if (errores.size() > 0) {
-//            // Throw ExceptionPersonalizada(errores);
-//        } else {
-//
-//            return;
-//        }
-
     }
 
-//    public void transferir2(Integer idOrigen, Integer idDestino, double monto) {
-//        List<CuentaBancaria> cuentas = CuentaBancaria.getCuentas();
-//        for (CuentaBancaria cuenta : cuentas) {
-//            if (cuenta.getId().equals(idOrigen)) {
-//                if (cuenta.getSaldo() >= monto) {
-//                    cuenta.setSaldo(cuenta.getSaldo() - monto);
-//                }
-//            } else if (cuenta.getId().equals(idDestino)) {
-//                cuenta.setSaldo(cuenta.getSaldo() + monto);
-//            }
-//        }
-//    }
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final CuentaBancaria other = (CuentaBancaria) obj;
+        return Objects.equals(this.id, other.id);
+    }
+
 }

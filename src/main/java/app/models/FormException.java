@@ -9,8 +9,8 @@ import java.util.List;
  */
 public class FormException extends Exception{
 
-    public FormException(List<String> errores) {        
-        super();
+    public FormException(String errores) {        
+        super(errores);
     }
     
     
