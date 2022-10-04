@@ -65,24 +65,32 @@ public class CuentaBancaria implements Serializable {
         cuentas.add(cuenta3);
         return cuentas;
     }
+    
+    //devolver el saldo segun el Id
+    public double getSaldoById(Integer idCuenta){
+        double saldo = 0;
+        for (CuentaBancaria cuenta : cuentas) {
+            if (cuenta.getId().equals(idCuenta)) {
+                saldo = cuenta.getSaldo();
+                break;
+            }
+        }
+        return saldo;
+    }   
 
     public static List<CuentaBancaria> getCuentas() {
         return cuentas;
     }
 
     public void transferir(Map<String, String[]> parametros) throws FormException {
-        List<CuentaBancaria> cuentas = CuentaBancaria.getCuentas();        
+        List<CuentaBancaria> cuentas = CuentaBancaria.getCuentas();
         String patternNum = "[\\d]+";
-        Integer idOrigen = Integer.parseInt(parametros.get("origen")[0]);
-        Integer idDestino = Integer.parseInt(parametros.get("destino")[0]);
-        Double monto = Double.parseDouble(parametros.get("monto")[0]);
 
+        //Verifico que los campos no vengan vacios
         if (parametros.get("origen")[0].isEmpty()) {
             this.errores.add("El campo Cuenta Origen esta vacio");
         } else if (!Pattern.matches(patternNum, parametros.get("origen")[0])) {
             this.errores.add("El campo Cuenta Origen no es numero");
-        } else if (idOrigen.equals(idDestino)) {
-            this.errores.add("La transferencia no se puede enviar a la misma cuenta de origen");
         }
 
         if (parametros.get("destino")[0].isEmpty()) {
@@ -90,7 +98,24 @@ public class CuentaBancaria implements Serializable {
         } else if (!Pattern.matches(patternNum, parametros.get("destino")[0])) {
             this.errores.add("El campo Cuenta Destino no es numero");
         }
-        
+
+        //Si encuentro algun error, lanzo la excepcion para no seguir ejecutando "transferir"
+        if (errores.size() > 0) {
+            throw new FormException("Se han encontrado Errores");
+        }
+
+        //Si no encuentro errores de campo vacio parseo los valores del form para manejarlos mas comodo
+        Integer idOrigen = Integer.parseInt(parametros.get("origen")[0]);
+        Integer idDestino = Integer.parseInt(parametros.get("destino")[0]);
+        Double monto = Double.parseDouble(parametros.get("monto")[0]);
+
+        if (idOrigen.equals(idDestino)) {
+            this.errores.add("La transferencia no se puede enviar a la misma cuenta de origen");
+        }
+
+        if (monto <= 0) {
+            this.errores.add("El monto a transferir debe ser mayor a 0");
+        }
 
         for (CuentaBancaria cuenta : cuentas) {
             if (cuenta.getId().equals(idOrigen)) {
@@ -111,7 +136,6 @@ public class CuentaBancaria implements Serializable {
                 cuenta.setSaldo(cuenta.getSaldo() + monto);
             }
         }
-
     }
 
     @Override
@@ -135,5 +159,4 @@ public class CuentaBancaria implements Serializable {
         final CuentaBancaria other = (CuentaBancaria) obj;
         return Objects.equals(this.id, other.id);
     }
-
 }

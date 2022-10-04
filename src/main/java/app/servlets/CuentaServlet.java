@@ -34,6 +34,7 @@ public class CuentaServlet extends HttpServlet {
             req.setAttribute("origen", parametros.get("origen")[0]);
             req.setAttribute("destino", parametros.get("destino")[0]);
             req.setAttribute("monto", parametros.get("monto")[0]);
+            req.setAttribute("saldo", cuenta.getSaldoById(Integer.parseInt(parametros.get("origen")[0])));
             
             req.getRequestDispatcher("/WEB-INF/views/transferencia/deposito.jsp").forward(req, resp);
         } catch (FormException e) {
